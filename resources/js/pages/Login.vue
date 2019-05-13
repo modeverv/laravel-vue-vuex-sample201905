@@ -62,12 +62,20 @@ export default {
     };
   },
   methods: {
-    login() {
-      window.console.log(this.loginForm);
-    },
-    register () {
+    async register () {
       window.console.log(this.registerForm)
-    }
+      // authストアのregisterアクションを呼び出す
+      await this.$store.dispatch('auth/register', this.registerForm)
+      // トップページに移動する
+      this.$router.push('/')
+    },
+    async login () {
+      window.console.log(this.loginForm);
+      // authストアのloginアクションを呼び出す
+      await this.$store.dispatch('auth/login', this.loginForm)
+      // トップページに移動する
+      this.$router.push('/')
+    },
   }
 };
 </script>
