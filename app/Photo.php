@@ -96,7 +96,8 @@ class Photo extends Model
      */
     public function getUrlAttribute()
     {
-        return Storage::cloud()->url($this->attributes['filename']);
+        // return Storage::cloud()->url($this->attributes['filename']);
+        return Storage::url($this->attributes['filename']);
     }
 
     /**

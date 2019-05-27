@@ -50,7 +50,8 @@ class PhotoController extends Controller
     public function download(Photo $photo)
     {
         // 写真の存在チェック
-        if (!Storage::cloud()->exists($photo->filename)) {
+        // if (!Storage::cloud()->exists($photo->filename)) {
+        if (!Storage::disk('public')->exists($photo->filename)) {
             abort(404);
         }
 
@@ -59,7 +60,8 @@ class PhotoController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $photo->filename . '"',
         ];
 
-        return response(Storage::cloud()->get($photo->filename), 200, $headers);
+        // return response(Storage::cloud()->get($photo->filename), 200, $headers);
+        return response(file_get_contents(public_path('storage/') . $photo->filename), 200, $headers);
     }
 
     /**
@@ -78,9 +80,12 @@ class PhotoController extends Controller
         // 本来の拡張子を組み合わせてファイル名とする
         $photo->filename = $photo->id . '.' . $extension;
 
-        // S3にファイルを保存する
-        // 第三引数の'public'はファイルを公開状態で保存するため
-        Storage::cloud()->putFileAs('', $request->photo, $photo->filename, 'public');
+        //// S3にファイルを保存する
+        //// 第三引数の'public'はファイルを公開状態で保存するため
+        //Storage::cloud()->putFileAs('', $request->photo, $photo->filename, 'public');
+
+        // ローカルにファイルを保存する
+        Storage::putFileAs('public', $request->photo, $photo->filename, 'public');
 
         // データベースエラー時にファイル削除を行うため
         // トランザクションを利用する
@@ -92,7 +97,8 @@ class PhotoController extends Controller
         } catch (\Exception $exception) {
             DB::rollBack();
             // DBとの不整合を避けるためアップロードしたファイルを削除
-            Storage::cloud()->delete($photo->filename);
+            //Storage::cloud()->delete($photo->filename);
+            Storage::disk('public')->delete($photo->filename);
             throw $exception;
         }
 
