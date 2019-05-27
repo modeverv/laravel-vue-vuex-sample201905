@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -14,7 +15,7 @@ class Photo extends Model
 
     /** JSONに含める属性 */
     protected $appends = [
-        'url',
+        'url', 'likes_count', 'liked_by_user',
     ];
 
     /** JSONに含めない属性 */
@@ -22,11 +23,46 @@ class Photo extends Model
         'user_id', 'filename',
         self::CREATED_AT, self::UPDATED_AT,
     ];
-    
+
     /** JSONに含める属性 */
     protected $visible = [
-        'id', 'owner', 'url', 'comments'
+        'id', 'owner', 'url', 'comments',
+        'likes_count', 'liked_by_user',
     ];
+
+
+    /**
+     * アクセサ - likes_count
+     * @return int
+     */
+    public function getLikesCountAttribute()
+    {
+        return $this->likes->count();
+    }
+
+    /**
+     * アクセサ - liked_by_user
+     * @return boolean
+     */
+    public function getLikedByUserAttribute()
+    {
+        if (Auth::guest()) {
+            return false;
+        }
+
+        return $this->likes->contains(function ($user) {
+            return $user->id === Auth::user()->id;
+        });
+    }
+
+    /**
+     * リレーションシップ - usersテーブル
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function likes()
+    {
+        return $this->belongsToMany('App\User', 'likes')->withTimestamps();
+    }
 
     public function comments()
     {
@@ -35,7 +71,7 @@ class Photo extends Model
 
     /** IDの桁数 */
     const ID_LENGTH = 12;
-    
+
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
