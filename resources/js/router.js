@@ -4,7 +4,7 @@ import VueRouter from "vue-router";
 // ページコンポーネントをインポートする
 import PhotoList from "./pages/PhotoList.vue";
 import Login from "./pages/Login.vue";
-import PhotoDetail from './pages/PhotoDetail.vue'
+import PhotoDetail from "./pages/PhotoDetail.vue";
 
 import store from "./store";
 import SystemError from "./pages/errors/System.vue";
@@ -17,7 +17,12 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    component: PhotoList
+    component: PhotoList,
+    props: (route) => {
+      const page = route.query.page;
+      window.console.log(`page is ${page}`);
+      return { page: /^[1-9][0-9]*$/.test(page) ? page * 1 : 1 };
+    }
   },
   {
     path: "/photos/:id",
@@ -44,6 +49,9 @@ const routes = [
 // VueRouterインスタンスを作成する
 const router = new VueRouter({
   mode: "history",
+  scrollBehavior () {
+    return { x:0, y:0 }
+  },
   routes
 });
 

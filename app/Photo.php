@@ -10,6 +10,8 @@ class Photo extends Model
     /** プライマリキーの型 */
     protected $keyType = 'string';
 
+    protected $perPage = 15;
+
     /** JSONに含める属性 */
     protected $appends = [
         'url',
@@ -28,7 +30,7 @@ class Photo extends Model
 
     /** IDの桁数 */
     const ID_LENGTH = 12;
-
+    
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
